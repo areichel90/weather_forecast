@@ -21,7 +21,7 @@ def plot_temp(df):
 
 def plot_forecast_interactive(df, location):
     from plotly.subplots import make_subplots
-    fig = go.FigureWidget(make_subplots(rows=2, cols=1, shared_xaxes=True))
+    fig = go.FigureWidget(make_subplots(rows=3, cols=1, shared_xaxes=True))
 
     # temperature plot
     fig['layout']['yaxis']['title'] = 'Temperature [^oC]'
@@ -31,24 +31,29 @@ def plot_forecast_interactive(df, location):
                   row=1, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['windchill_temp'], name='windchill [^oF]', ),
                   row=1, col=1)
-    fig.add_trace(go.Scatter(x=df.index, y=df['wind_speed'], name='windspeed [km/h]', ),
-                  row=1, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=[32]*len(df),
                              name='Freezing Point',
                              line_dash='dash',
                              showlegend=False),
                   row=1, col=1)
 
+    # windplot
+    plot_index = 2
+    fig['layout'][f'yaxis{plot_index}']['title'] = 'Wind [tbd]'
+    fig.add_trace(go.Scatter(x=df.index, y=df['wind_speed'], name='windspeed [km/h]', ),
+                  row=plot_index, col=1)
+
     # snowfall plot
-    fig['layout']['yaxis2']['title'] = 'Snowfall [in]'
+    plot_index = 3
+    fig['layout'][f'yaxis{plot_index}']['title'] = 'Snowfall [in]'
     fig.add_trace(go.Scatter(x=df.index, y=df['snowfall'], name='hourly snowfall [in]',),
-                  row=2, col=1)
+                  row=plot_index, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['cum_snow'], name='(total) snowfall [in]', ),
-                  row=2, col=1)
+                  row=plot_index, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['cover']/100, name='cloud cover [^oF]', ),
-                  row=2, col=1)
+                  row=plot_index, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['perc_precip']/100, name='perc precip [^oF]', ),
-                  row=2, col=1)
+                  row=plot_index, col=1)
 
     '''for c,col in enumerate(df.columns):
         fig.append_trace(go.Scatter(x=df.index, y=df[col]),
@@ -57,5 +62,5 @@ def plot_forecast_interactive(df, location):
     fig.update_layout(title_text=f'{df.index.min()} - {df.index.max()}<br>Last Updated {location.lastUpdated}',
                       hovermode='x unified',
                       legend_traceorder='normal')
-    fig.update_traces(xaxis='x2')
+    fig.update_traces(xaxis='x3')
     fig.show()
