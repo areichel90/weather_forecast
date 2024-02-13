@@ -1,3 +1,5 @@
+import datetime
+
 import requests, pprint
 import numpy as np
 import pandas as pd
@@ -12,19 +14,34 @@ class location():
         #self.forecast_url = self.reqProp["forecastGridData"]
         self.grid_data = requests.get(self.reqProp["forecastGridData"]).json()
         self.data_props = self.grid_data["properties"]
+        self.lastUpdated = self.data_props["updateTime"]
+
+        '''pprint.pprint(self.data_props["temperature"])
+        exit()'''
 
     def get_forecast(self):
         #self.forecast = requests.get(self.forecast_url).json()
-        self.forecastTemps = self.data_props['apparentTemperature']['values']
+        self.apparentTemps = self.data_props['apparentTemperature']['values']
+        self.forecastTemps = self.data_props["temperature"]['values']
+        self.windchillTemps = self.data_props["windChill"]['values']
         self.snowfallAmount = self.data_props['snowfallAmount']['values']
+        self.cloudCover = self.data_props["skyCover"]['values']
+        self.windSpeed = self.data_props["windSpeed"]['values']
+        self.percPrecip = self.data_props["probabilityOfPrecipitation"]['values']
+
+
 
 def c_to_f(c):
     return 1.8*c + 32
 
-def format_data(data_in):
+def format_data(data_in, verbose=False):
     df_in = pd.DataFrame(data_in)
+    if verbose: print(df_in)
+
     df_in["validTime"] = df_in.validTime.apply(lambda x: x.split("/")[0].split("+")[0])
     df_in["dateTime"] = pd.to_datetime(df_in.validTime, format="%Y-%m-%dT%H:%M:%S")
+    # adjust timezone
+    df_in["dateTime"] = df_in.dateTime - datetime.timedelta(hours=5)
     df_in = df_in.set_index("dateTime").drop("validTime", axis=1)
     return df_in
 
@@ -38,20 +55,43 @@ def main(loc:location):
     # format temperature forecast
     df_temps = format_data(temps)
     df_temps["temperature"] = [c_to_f(i) for i in df_temps.value]
+    df_apTemps = format_data(loc.apparentTemps)
+    df_apTemps["apparent_temp"] = [c_to_f(i) for i in df_apTemps.value]
+    df_chill = format_data(loc.windchillTemps)
+    df_chill["windchill_temp"] = [c_to_f(i) for i in df_chill.value]
+
+    # clouds and wind
+    df_cloudcover = format_data(loc.cloudCover)
+    df_cloudcover["cover"] = df_cloudcover.value
+    df_wind = format_data(loc.windSpeed)
+    df_wind["wind_speed"] = df_wind.value
+    df_precip = format_data(loc.percPrecip)
+    df_precip["perc_precip"] = df_precip.value
+
     # format snowfall forecast
     df_snow = format_data(snow)
     df_snow["snowfall"] = df_snow.value/25.4  # mm / in
+
     # combine all data field(s)
     df_data = df_temps[["temperature"]].join(df_snow["snowfall"])
+    df_data = df_data.join(df_apTemps["apparent_temp"])
+    df_data = df_data.join(df_chill["windchill_temp"])
+    df_data = df_data.join(df_cloudcover["cover"])
+    df_data = df_data.join(df_wind["wind_speed"])
+    df_data = df_data.join(df_precip["perc_precip"])
+    df_data = df_data.fillna(method="ffill")
 
+    # caculate daily accumulation of snow
     df_data['day'] = df_data.index.day
     df_data.snowfall.fillna(0, inplace=True)
     df_data['cum_snow'] = df_data.groupby('day')['snowfall'].transform(pd.Series.cumsum)
 
+    '''print(df_data.head())
+    exit()'''
 
-    # plot temp forecast
+    # --- plot temp forecast
     #plot_temp(df_data)
-    plot_forecast_interactive(df_data)
+    plot_forecast_interactive(df_data, loc)
 
 
 if __name__ == "__main__":
