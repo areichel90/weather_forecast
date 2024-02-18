@@ -14,12 +14,10 @@ class location():
         #self.forecast_url = self.reqProp["forecastGridData"]
         self.grid_data = requests.get(self.reqProp["forecastGridData"]).json()
         self.data_props = self.grid_data["properties"]
-        self.lastUpdated = self.data_props["updateTime"]
-
-        '''pprint.pprint(self.data_props["temperature"])
-        exit()'''
+        self.lastUpdated = datetime.datetime.fromisoformat(self.data_props["updateTime"]) - datetime.timedelta(hours=5)
 
     def get_forecast(self):
+        print(f"fetching forecast for location: self: [{self.lat}, {self.lon}]")
         #self.forecast = requests.get(self.forecast_url).json()
         self.apparentTemps = self.data_props['apparentTemperature']['values']
         self.forecastTemps = self.data_props["temperature"]['values']
@@ -46,12 +44,10 @@ def format_data(data_in, verbose=False):
     return df_in
 
 
-def main(loc:location):
-    loc.get_forecast()
+def process_data(loc):
     temps = loc.forecastTemps
     snow = pd.DataFrame(loc.snowfallAmount)
     # create dataframe from individual data 'series'
-
     # format temperature forecast
     df_temps = format_data(temps)
     df_temps["temperature"] = [c_to_f(i) for i in df_temps.value]
@@ -70,7 +66,7 @@ def main(loc:location):
 
     # format snowfall forecast
     df_snow = format_data(snow)
-    df_snow["snowfall"] = df_snow.value/25.4  # mm / in
+    df_snow["snowfall"] = df_snow.value / 25.4  # mm / in
 
     # combine all data field(s)
     df_data = df_temps[["temperature"]].join(df_snow["snowfall"])
@@ -86,8 +82,12 @@ def main(loc:location):
     df_data.snowfall.fillna(0, inplace=True)
     df_data['cum_snow'] = df_data.groupby('day')['snowfall'].transform(pd.Series.cumsum)
 
-    '''print(df_data.head())
-    exit()'''
+    return df_data
+
+
+def main(loc:location):
+    loc.get_forecast()
+    df_data = process_data(loc)
 
     # --- plot temp forecast
     #plot_temp(df_data)
