@@ -10,7 +10,8 @@ df = process_data(_loc)
 forecast_fig = plot_forecast_interactive(df, _loc, display_vis=False)
 
 # --- dash stuff
-app = Dash(__name__)
+app = Dash(__name__, )
+application = app.server
 app.layout = html.Div([
     html.H1(children=f'NOAA Weather forecast',
             style={'textAlign':'left'}),
@@ -41,4 +42,5 @@ def update_graph(n_clicks, lat_in, lon_in):
     return plot_forecast_interactive(df, _loc, display_vis=False)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    application.run(host='0.0.0.0', port='8081')
+    #app.run(debug=True)
