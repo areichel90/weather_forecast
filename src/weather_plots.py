@@ -21,7 +21,6 @@ def plot_temp(df):
 
 def plot_forecast_interactive(df, location, display_vis=True):
     from plotly.subplots import make_subplots
-    print("plotting")
     fig = go.FigureWidget(make_subplots(rows=3, cols=1, shared_xaxes=True))
 
     # temperature plot
@@ -57,8 +56,8 @@ def plot_forecast_interactive(df, location, display_vis=True):
                   row=plot_index, col=1)
 
 
-    fig.update_layout(title_text=f'{df.index.min()} - {df.index.max()}<br>Lat/Lon: {location.lat}, {location.lon}'
-                                 f'<br>Last Updated {location.lastUpdated}',
+    fig.update_layout(title_text=f'{df.index.min()} - {df.index.max()}<br>Lat/Lon: {location.actual_loc[1]}, '
+                                 f'{location.actual_loc[0]}<br>Last Updated {location.lastUpdated}<br>',
                       height=650,
                       hovermode='x unified',
                       legend_traceorder='normal')

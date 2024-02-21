@@ -15,10 +15,14 @@ class location():
         self.grid_data = requests.get(self.reqProp["forecastGridData"]).json()
         self.data_props = self.grid_data["properties"]
         self.lastUpdated = datetime.datetime.fromisoformat(self.data_props["updateTime"]) - datetime.timedelta(hours=5)
+        self.location = self.grid_data["geometry"]["coordinates"]
+
+        # --- format locations
+        df_loc = pd.DataFrame(np.array(self.location).reshape(5, 2))
+        self.actual_loc = [round(df_loc[i].mean(), 5) for i in df_loc]
 
     def get_forecast(self):
         print(f"fetching forecast for location: self: [{self.lat}, {self.lon}]")
-        #self.forecast = requests.get(self.forecast_url).json()
         self.apparentTemps = self.data_props['apparentTemperature']['values']
         self.forecastTemps = self.data_props["temperature"]['values']
         self.windchillTemps = self.data_props["windChill"]['values']
