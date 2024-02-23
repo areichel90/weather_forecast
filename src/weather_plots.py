@@ -24,7 +24,7 @@ def plot_forecast_interactive(df, location, display_vis=True):
     fig = go.FigureWidget(make_subplots(rows=3, cols=1, shared_xaxes=True))
 
     # temperature plot
-    fig['layout']['yaxis']['title'] = 'Temperature [^oC]'
+    fig['layout']['yaxis']['title'] = 'Temperature [^oF]'
     fig.add_trace(go.Scatter(x=df.index, y=df['temperature'], name='temperature [^oF]',),
                   row=1, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['apparent_temp'], name='feels like [^oF]', ),
@@ -39,7 +39,7 @@ def plot_forecast_interactive(df, location, display_vis=True):
 
     # snowfall plot
     plot_index = 2
-    fig['layout'][f'yaxis{plot_index}']['title'] = 'Precipitation [in]'
+    fig['layout'][f'yaxis{plot_index}']['title'] = 'Precipitation'
     fig.add_trace(go.Scatter(x=df.index, y=df['snowfall'], name='hourly snowfall [in]',),
                   row=plot_index, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['cum_snow'], name='(total) snowfall [in]', ),
@@ -49,7 +49,7 @@ def plot_forecast_interactive(df, location, display_vis=True):
 
     # windplot
     plot_index = 3
-    fig['layout'][f'yaxis{plot_index}']['title'] = 'Wind [tbd]'
+    fig['layout'][f'yaxis{plot_index}']['title'] = 'Wind'
     fig.add_trace(go.Scatter(x=df.index, y=df['wind_speed'], name='windspeed [km/h]', ),
                   row=plot_index, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['cover'], name='cloud cover [%]', ),
