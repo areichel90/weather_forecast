@@ -15,6 +15,7 @@ load_figure_template('DARKLY')
 
 # --- dash stuff
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app.title = ('Babagooey')
 application = app.server
 SIDEBAR_STYLE = {
     "position": "fixed",
@@ -65,5 +66,5 @@ def update_graph(n_clicks, lat_in, lon_in):
     return plot_forecast_interactive(df, _loc, display_vis=False)
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port='8081')
+    application.run(host='0.0.0.0', port='8085')
     #app.run(debug=True)
