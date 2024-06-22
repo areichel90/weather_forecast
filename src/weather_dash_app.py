@@ -15,6 +15,7 @@ load_figure_template('DARKLY')
 
 # --- dash stuff
 app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app.title = ('Babagooey')
 application = app.server
 SIDEBAR_STYLE = {
     "position": "fixed",
