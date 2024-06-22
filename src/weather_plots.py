@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 
@@ -37,7 +37,7 @@ def plot_forecast_interactive(df, location, display_vis=True):
                              showlegend=False),
                   row=1, col=1)
 
-    # snowfall plot
+    # precipitation plot
     plot_index = 2
     fig['layout'][f'yaxis{plot_index}']['title'] = 'Precipitation [in]'
     fig.add_trace(go.Scatter(x=df.index, y=df['snowfall'], name='hourly snowfall [in]',),
@@ -45,6 +45,8 @@ def plot_forecast_interactive(df, location, display_vis=True):
     fig.add_trace(go.Scatter(x=df.index, y=df['cum_snow'], name='(total) snowfall [in]', ),
                   row=plot_index, col=1)
     fig.add_trace(go.Scatter(x=df.index, y=df['perc_precip']/100, name='perc precip [^oF]', ),
+                  row=plot_index, col=1)
+    fig.add_trace(go.Scatter(x=df.index, y=df['rel_humidity']/100, name='rel humidity [%]', ),
                   row=plot_index, col=1)
 
     # windplot

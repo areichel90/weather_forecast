@@ -14,8 +14,12 @@ class location():
         #self.forecast_url = self.reqProp["forecastGridData"]
         self.grid_data = requests.get(self.reqProp["forecastGridData"]).json()
         self.data_props = self.grid_data["properties"]
-        self.lastUpdated = datetime.datetime.fromisoformat(self.data_props["updateTime"]) - datetime.timedelta(hours=5)
+        self.lastUpdated = datetime.datetime.fromisoformat(self.data_props["updateTime"]) - datetime.timedelta(hours=4)
         self.location = self.grid_data["geometry"]["coordinates"]
+
+        pprint.pprint(self.grid_data)
+        pprint.pprint(self.reqProp)
+        #exit()
 
         # --- format locations
         df_loc = pd.DataFrame(np.array(self.location).reshape(5, 2))
@@ -30,11 +34,17 @@ class location():
         self.cloudCover = self.data_props["skyCover"]['values']
         self.windSpeed = self.data_props["windSpeed"]['values']
         self.percPrecip = self.data_props["probabilityOfPrecipitation"]['values']
+        self.probThunder = self.data_props["probabilityOfThunder"]['values']
+        self.relHumidity = self.data_props["relativeHumidity"]['values']
+
+    def debug(self):
+        pprint.pprint(self.data_props.keys())
+        exit()
 
 
 
 def c_to_f(c):
-    return 1.8*c + 32
+    return 1.8*c + 32 if c is not None else np.nan
 
 def format_data(data_in, verbose=False):
     df_in = pd.DataFrame(data_in)
@@ -68,6 +78,13 @@ def process_data(loc):
     df_precip = format_data(loc.percPrecip)
     df_precip["perc_precip"] = df_precip.value
 
+    # humidity
+    df_humidity = format_data(loc.relHumidity)
+    df_humidity["rel_humidity"] = df_humidity.value
+
+    # thunder
+    #df_thunder = format_data(loc.probThunder)
+
     # format snowfall forecast
     df_snow = format_data(snow)
     df_snow["snowfall"] = df_snow.value / 25.4  # mm / in
@@ -79,6 +96,7 @@ def process_data(loc):
     df_data = df_data.join(df_cloudcover["cover"])
     df_data = df_data.join(df_wind["wind_speed"])
     df_data = df_data.join(df_precip["perc_precip"])
+    df_data = df_data.join(df_humidity["rel_humidity"])
     df_data = df_data.fillna(method="ffill")
 
     # caculate daily accumulation of snow
@@ -89,13 +107,22 @@ def process_data(loc):
     return df_data
 
 
+
 def main(loc:location):
+    # globals
+    debug = False
+
     loc.get_forecast()
     df_data = process_data(loc)
+
+    # --- test/debug/eda
+    if debug: loc.debug()
 
     # --- plot temp forecast
     #plot_temp(df_data)
     plot_forecast_interactive(df_data, loc)
+
+
 
 
 if __name__ == "__main__":

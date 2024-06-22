@@ -1,15 +1,12 @@
-FROM ubuntu:22.04
+FROM python:3.10
 
 #WORKDIR ..
 
-COPY ./src/ src
+COPY ./../src/ /src/
 
 WORKDIR src
 
-RUN apt-get update && \
-    apt-get install -y python3 && \
-    apt-get install -y python3-pip && \
-    pip install requests && \
+RUN pip install requests && \
     pip install pandas && \
     pip install numpy && \
     pip install plotly && \

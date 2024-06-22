@@ -65,5 +65,5 @@ def update_graph(n_clicks, lat_in, lon_in):
     return plot_forecast_interactive(df, _loc, display_vis=False)
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port='8081')
+    application.run(host='0.0.0.0', port='8085')
     #app.run(debug=True)
